@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+venv/
+.venv/
+
+# Environment and local data
+.env
+.env.*
+!.env.example
+*.sqlite3
+*.db
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Local editor files
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.log
