@@ -123,6 +123,33 @@ class DossierViewSet(viewsets.ModelViewSet):
 
         return Response(DossierSerializer(dossier).data)
 
+    @action(detail=True, methods=['post'])
+    def renvoyer_au_sg(self, request, pk=None):
+        """Un service concerné rend la main au SG après traitement."""
+        dossier = self.get_object()
+        if request.user.role != 'service_concerne' and not request.user.is_superuser:
+            return Response(
+                {'detail': "Seul un service concerné peut renvoyer un dossier."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        ancien_service = dossier.service_actuel
+        dossier.service_actuel = None
+        dossier.statut = 'transmis_sg'
+        dossier.save(update_fields=['service_actuel', 'statut', 'date_maj'])
+
+        JournalAudit.objects.create(
+            dossier=dossier,
+            utilisateur=request.user,
+            action=f"Rapport renvoyé au SG par {ancien_service.nom if ancien_service else 'un service'}",
+        )
+        notifier_utilisateurs(
+            Utilisateur.objects.filter(role='sg'),
+            dossier,
+            f"Le service a renvoyé son rapport sur le dossier {dossier.numero}.",
+        )
+        return Response(DossierSerializer(dossier).data)
+
 
 class UtilisateurCourantView(APIView):
     permission_classes = [permissions.IsAuthenticated]

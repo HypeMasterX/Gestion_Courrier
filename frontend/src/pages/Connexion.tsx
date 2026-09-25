@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getUtilisateurConnecte, login } from '../api/client'
+import { getRouteParDefaut } from '../utils/redirectionRole'
 
 export default function Connexion() {
   const [username, setUsername] = useState('')
@@ -13,8 +14,8 @@ export default function Connexion() {
     setErreur('')
     try {
       await login(username, password)
-      await getUtilisateurConnecte()
-      navigate('/dossiers')
+      const utilisateur = await getUtilisateurConnecte()
+      navigate(getRouteParDefaut(utilisateur.role))
     } catch {
       setErreur('Identifiant ou mot de passe incorrect.')
     }
